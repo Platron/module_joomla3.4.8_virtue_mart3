@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension version="3.4" type="plugin" group="vmpayment" method="upgrade">
+    <name>VM - Payment, Platron</name>
+    <creationDate>Mar 2016</creationDate>
+    <author>Lashnev Alexey</author>
+    <copyright></copyright>
+    <license></license>
+    <version>3.4.6</version>
+    <description><![CDATA[Платрон - универсальная система приема платежей на сайте. Система жлектронных платежей для интернет магазинов]]></description>
+    <files>
+		<filename plugin="platron">platron.php</filename>
+		<filename>index.html</filename>
+		<filename>PG_Signature.php</filename>
+    </files>
+	<languages>
+		<language tag="ru-RU">ru-RU.plg_vmpayment_platron.ini</language>
+		<language tag="en-GB">en-GB.plg_vmpayment_platron.ini</language>
+	</languages>
+    <config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field 
+					name="testing_mode"
+					type="radio"
+					default="TEST"
+					label="VMPAYMENT_PLATRON_TESTING_MODE"
+					description="VMPAYMENT_PLATRON_TESTING_MODE_DESC">
+					<option value="TEST">VMPAYMENT_PLATRON_TEST</option>
+					<option value="PRODUCTION">VMPAYMENT_PLATRON_PRODUCTION</option>
+				</field>
+				<field 
+					name="platron_id"
+					type="text"
+					default=""
+					size="50"
+					label="VMPAYMENT_PLATRON_ID"
+					description="VMPAYMENT_PLATRON_ID_DESC"/>
+				<field
+					name="platron_secret"
+					type="text"
+					default=""
+					size="50"
+					label="VMPAYMENT_PLATRON_SECRET"
+					description="VMPAYMENT_PLATRON_SECRET_DESC"/>
+				<field
+					name="platron_life_time"
+					type="text"
+					default="24"
+					size="50"
+					label="VMPAYMENT_PLATRON_LIFE_TIME"
+					description="VMPAYMENT_PLATRON_LIFE_TIME_DESC"/>
+				<field
+					name="status_success"
+					type="vmorderstate"
+					scope="com_virtuemart"
+					default="C"
+					label="VMPAYMENT_PLATRON_STATUS_SUCCESS"
+					description="VMPAYMENT_PLATRON_STATUS_SUCCESS_DESC">
+				</field>
+				<field
+					name="status_canceled"
+					type="vmorderstate"
+					scope="com_virtuemart"
+					default="X"
+					label="VMPAYMENT_PLATRON_STATUS_FAILED"
+					description="VMPAYMENT_PLATRON_STATUS_FAILED_DESC">
+				</field>
+				<field
+					name="status_pending"
+					type="vmorderstate"
+					scope="com_virtuemart"
+					default="P"
+					label="VMPAYMENT_PLATRON_STATUS_PENDING"
+					description="VMPAYMENT_PLATRON_STATUS_PENDING_DESC">
+				</field>
+			</fieldset>
+		</fields>
+    </config>
+</extension> 

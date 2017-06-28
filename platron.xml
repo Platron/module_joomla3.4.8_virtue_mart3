@@ -58,6 +58,26 @@
                         label="VMPAYMENT_PLATRON_LIFE_TIME"
                         description="VMPAYMENT_PLATRON_LIFE_TIME_DESC"/>
                 <field
+                        name="platron_create_ofd_check"
+                        type="platronfields"
+                        default=""
+                        size="50"
+                        label="VMPAYMENT_PLATRON_CREATE_OFD_CHECK"
+                        description="VMPAYMENT_PLATRON_CREATE_OFD_CHECK_DESC"/>
+				<field 
+						name="platron_ofd_vat"
+                        type="platronfields"
+						default="0"
+						label="VMPAYMENT_PLATRON_OFD_VAT"
+						description="VMPAYMENT_PLATRON_OFD_VAT_DESC">
+                	<option value="0">0%</option>
+                	<option value="10">10%</option>
+               		<option value="18">18%</option>
+                	<option value="110">10/110%</option>
+                	<option value="180">18/118%</option>
+				</field>
+
+                <field
                         name="status_success"
                         type="platronfields"
                         scope="com_virtuemart"

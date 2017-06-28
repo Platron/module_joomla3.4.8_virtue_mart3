@@ -106,7 +106,6 @@ class JFormFieldPlatronfields extends JFormField {
 				. '</fieldset>';
 		}
 		if($this->fieldname == 'platron_ofd_vat'){
-#var_dump($paramsByKey);echo '------------';
 			$vat_types = [
                              '0' => '0%',
                              '10' => '10%',

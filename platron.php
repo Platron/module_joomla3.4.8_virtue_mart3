@@ -190,7 +190,7 @@ class plgVmPaymentPlatron extends vmPSPlugin
 
 		   		if ($shipment > 0) {
 					$ofdReceiptItem = new OfdReceiptItem();
-					$ofdReceiptItem->label = 'Shipping';
+					$ofdReceiptItem->label = $this->getShipmentName($cart);
 					$ofdReceiptItem->amount = round($shipment, 2);
 					$ofdReceiptItem->price = round($shipment, 2);
 					$ofdReceiptItem->quantity = 1;
@@ -220,7 +220,7 @@ class plgVmPaymentPlatron extends vmPSPlugin
 		$arrReq['pg_sig'] = PG_Signature::make('payment.php', $arrReq, $method->platron_secret);
 		$query = http_build_query($arrReq);
 
-		header("Location: https://www.platron.ru/payment.php?$query");
+		header('Location: ' . $responseElement->pg_redirect_url . '&' . $query);
 		
         return $this->processConfirmedOrderPaymentResponse(true, $cart, $order, $html, $this->renderPluginName($method, $order), 'P');
     }
@@ -247,6 +247,23 @@ class plgVmPaymentPlatron extends vmPSPlugin
         $html .= '</table>' . "\n";
         return $html;
     }
+
+	function getShipmentName(VirtueMartCart $cart) {
+		$shipment_name = 'Shipment';
+
+		if (!empty($cart->virtuemart_shipmentmethod_id) )  {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'shipmentmethod.php');
+			$vmms = new VirtueMartModelShipmentmethod();
+			$shipmentInfo = $vmms->getShipments();
+			foreach($shipmentInfo as $skey => $svalue){
+				if($svalue->virtuemart_shipmentmethod_id == $cart->virtuemart_shipmentmethod_id) {
+					$shipment_name = $svalue->shipment_name;
+				}
+			}
+		}
+
+		return $shipment_name;
+	}
     
     function getCosts(VirtueMartCart $cart, $method, $cart_prices)
     {

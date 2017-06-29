@@ -45,6 +45,8 @@ class JFormFieldPlatronfields extends JFormField {
 							'platron_id'=>'',
 							'platron_secret'=>'',
 							'platron_life_time'=>24,
+							'platron_create_ofd_check'=>'',
+							'platron_ofd_vat'=>'',
 							'status_success'=>'C',
 							'status_canceled'=>'X',
 							'status_pending'=>'P'];
@@ -88,6 +90,41 @@ class JFormFieldPlatronfields extends JFormField {
 		}
 		if($this->fieldname == 'platron_life_time'){
 			$html = '<input type="text" name="params[platron_life_time]" id="params_platron_life_time" value="'.$paramsByKey['platron_life_time'].'" size="50">';
+		}
+		$ofdChecked = 'checked="checked"';
+		$ofdNotChecked = '';
+		if($paramsByKey['platron_create_ofd_check'] == '0'){
+			$ofdChecked = '';
+			$ofdNotChecked = 'checked="checked"';
+		}
+		if($this->fieldname =='platron_create_ofd_check'){
+			$html = '<fieldset id="params_create_ofd_check" class="radio" >'
+				. '<input type="radio" id="params_create_ofd_check0" name="params[platron_create_ofd_check]" '.$ofdChecked.' value="1" />'
+				. '<label for="params_create_ofd_check0" >Да</label>'
+				. '<input type="radio" id="params_create_ofd_check1" name="params[platron_create_ofd_check]" '.$ofdNotChecked.' value="0" />'
+				. '<label for="params_create_ofd_check1">Нет</label>'
+				. '</fieldset>';
+		}
+		if($this->fieldname == 'platron_ofd_vat'){
+			$vat_types = [
+                             '0' => '0%',
+                             '10' => '10%',
+                             '18' => '18%',
+                             '110' => '10/110',
+                             '118' => '18/118'
+			];
+
+			$html = '<select id="params_'.$this->fieldname.'" name="params['.$this->fieldname.']">';
+
+			foreach ($vat_types as $key => $value) {
+				$html .= '<option value="'.$key.'"';
+
+				if(!empty($paramsByKey[$this->fieldname] && $key == $paramsByKey[$this->fieldname])){
+					$html .= ' selected="selected"';
+				}
+				$html .= '>'.$value.'</option>';
+			}
+			$html .= '</select>';
 		}
 		
 		if($this->fieldname == 'status_success' || $this->fieldname == 'status_canceled' || $this->fieldname == 'status_pending'){

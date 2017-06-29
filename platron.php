@@ -39,6 +39,14 @@ class plgVmPaymentPlatron extends vmPSPlugin
 				'',
 				'int'
 			),
+            'platron_create_ofd_check' => array(
+                '',
+                'char'
+            ),
+            'platron_ofd_vat' => array(
+                '',
+                'string'
+            ),
             'status_success' => array(
                 '',
                 'char'
@@ -83,6 +91,8 @@ class plgVmPaymentPlatron extends vmPSPlugin
     function plgVmConfirmedOrder($cart, $order) // главный метод - построение формы
     {
 		include("PG_Signature.php");
+		include("OfdReceiptRequest.php");
+		include("OfdReceiptItem.php");
 		
         if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
             return null; // Another method was selected, do nothing
@@ -114,7 +124,7 @@ class plgVmPaymentPlatron extends vmPSPlugin
 		$arrReq['pg_description'] = "Оплата заказа ".$_SERVER['HTTP_HOST']; // Описание заказа (показывается в Платёжной системе)
 		$arrReq['pg_site_url'] = $_SERVER['HTTP_HOST']; // Для возврата на сайт
 		$arrReq['pg_lifetime'] = $method->platron_life_time; // Время жизни в секундах
-		$arrReq['pg_user_ip'] = $_SERVER['REMOTE_ADDR'];
+//		$arrReq['pg_user_ip'] = $_SERVER['REMOTE_ADDR'];
 		$arrReq['pg_check_url'] = $check_url; // Проверка заказа
 		$arrReq['pg_result_url'] = $result_url; // Оповещение о результатах
 
@@ -151,6 +161,62 @@ class plgVmPaymentPlatron extends vmPSPlugin
 		
 		$arrReq['pg_salt'] = rand(21,43433);
 		$arrReq['cms_payment_module'] = 'VIRTUEMART';
+		$arrReq['pg_sig'] = PG_Signature::make('init_payment.php', $arrReq, $method->platron_secret);
+
+		$shipment = $order['details']['BT']->order_shipment + $order['details']['BT']->order_shipment_tax;
+
+		// OFD
+		$response = file_get_contents('https://www.platron.ru/init_payment.php?' . http_build_query($arrReq));
+		$responseElement = new SimpleXMLElement($response);
+
+		$checkResponse = PG_Signature::checkXML('init_payment.php', $responseElement, $method->platron_secret);
+
+		if ($checkResponse && (string)$responseElement->pg_status == 'ok') {
+
+			if ($method->platron_create_ofd_check == 1) {
+
+				$paymentId = (string)$responseElement->pg_payment_id;
+
+		        $ofdReceiptItems = array();
+				foreach ($order['items'] as $item) {
+		            $ofdReceiptItem = new OfdReceiptItem();
+		            $ofdReceiptItem->label = substr(str_replace(array('%', ':', '|'), '-', $item->order_item_name), 0, 128);
+		            $ofdReceiptItem->amount = round($item->product_final_price * $item->product_quantity, 2);
+		            $ofdReceiptItem->price = round($item->product_final_price, 2);
+		            $ofdReceiptItem->quantity = $item->product_quantity;
+		            $ofdReceiptItem->vat = $method->platron_ofd_vat;
+		            $ofdReceiptItems[] = $ofdReceiptItem;
+        		}
+
+		   		if ($shipment > 0) {
+					$ofdReceiptItem = new OfdReceiptItem();
+					$ofdReceiptItem->label = 'Shipping';
+					$ofdReceiptItem->amount = round($shipment, 2);
+					$ofdReceiptItem->price = round($shipment, 2);
+					$ofdReceiptItem->quantity = 1;
+					$ofdReceiptItem->vat = '18'; // fixed
+					$ofdReceiptItems[] = $ofdReceiptItem;
+		   		}
+
+				$ofdReceiptRequest = new OfdReceiptRequest($method->platron_id, $paymentId);
+				$ofdReceiptRequest->items = $ofdReceiptItems;
+				$ofdReceiptRequest->sign($method->platron_secret);
+
+				$responseOfd = file_get_contents('https://www.platron.ru/receipt.php?' . http_build_query($ofdReceiptRequest->requestArray()));
+				$responseElementOfd = new SimpleXMLElement($responseOfd);
+
+				if ((string)$responseElementOfd->pg_status != 'ok') {
+					vmError('Error. Platron OFD check create failed. Payment aborted. Please contact shop.');
+					return NULL;
+				}
+
+			}
+
+        } else {
+			vmError('Error. Platron init payment failed. Payment aborted. ' . $responseElement->pg_error_description);
+			return NULL;
+		}
+
 		$arrReq['pg_sig'] = PG_Signature::make('payment.php', $arrReq, $method->platron_secret);
 		$query = http_build_query($arrReq);
 

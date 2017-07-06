@@ -15,6 +15,8 @@
 		<filename>platron/fields/platronfields.php</filename>
         <filename>platron.gif</filename>
 		<filename>PG_Signature.php</filename>
+		<filename>OfdReceiptItem.php</filename>
+		<filename>OfdReceiptRequest.php</filename>
     </files>
 	<languages>
 		<language tag="ru-RU">ru-RU.plg_vmpayment_platron.ini</language>

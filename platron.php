@@ -194,7 +194,8 @@ class plgVmPaymentPlatron extends vmPSPlugin
 					$ofdReceiptItem->amount = round($shipment, 2);
 					$ofdReceiptItem->price = round($shipment, 2);
 					$ofdReceiptItem->quantity = 1;
-					$ofdReceiptItem->vat = $method->platron_ofd_vat == 'none'? 'none': 18;
+					$ofdReceiptItem->vat = $method->platron_ofd_vat == 'none'? 'none': 20;
+					$ofdReceiptItem->type = 'service';
 					$ofdReceiptItems[] = $ofdReceiptItem;
 		   		}
 
